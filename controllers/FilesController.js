@@ -10,7 +10,7 @@ const getFolderPath = () => process.env.FOLDER_PATH || '/tmp/files_manager';
 
 class FilesController {
   static async postUpload(req, res) {
-    if (!dbClient.isAlive()) {
+    if (!dbClient.isAlive() || !dbClient.db) {
       return res.status(503).json({ error: 'Database unavailable' });
     }
     const token = req.headers['x-token'];
