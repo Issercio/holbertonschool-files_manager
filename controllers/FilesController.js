@@ -10,6 +10,9 @@ const getFolderPath = () => process.env.FOLDER_PATH || '/tmp/files_manager';
 
 class FilesController {
   static async postUpload(req, res) {
+    if (!dbClient.isAlive()) {
+      return res.status(503).json({ error: 'Database unavailable' });
+    }
     const token = req.headers['x-token'];
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     const userId = await redisClient.get(`auth_${token}`);
