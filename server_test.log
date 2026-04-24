@@ -1,0 +1,12 @@
+(node:147447) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///root/holbertonschool-files_manager/server.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /root/holbertonschool-files_manager/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Waiting for MongoDB connection...
+Server running on port 5000
+GET /files called
+MongoDB query: {"userId":"69eb655a9a33ef3fcddce7c6","$or":[{"parentId":"0"},{"parentId":0},{"parentId":{"$exists":false}}]}
+Files found: 1
+GET /files called
+MongoDB query: {"userId":"69eb655a9a33ef3fcddce7c6","parentId":"5f1e881cc7ba06511e683b23"}
+Files found: 0

@@ -44,14 +44,22 @@ class FilesController {
     }
 
     static async getIndex(req, res) {
+      console.log('GET /files called');
       if (!dbClient.isAlive() || !dbClient.db) {
+        console.log('DB not alive');
         return res.status(503).json({ error: 'Database unavailable' });
       }
       try {
         const token = req.headers['x-token'];
-        if (!token) return res.status(401).json({ error: 'Unauthorized' });
+        if (!token) {
+          console.log('No token');
+          return res.status(401).json({ error: 'Unauthorized' });
+        }
         const userId = await redisClient.get(`auth_${token}`);
-        if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+        if (!userId) {
+          console.log('No userId for token');
+          return res.status(401).json({ error: 'Unauthorized' });
+        }
         const parentId = req.query.parentId;
         const page = parseInt(req.query.page, 10) || 0;
         let query = { userId: ObjectId(userId) };
@@ -67,12 +75,14 @@ class FilesController {
         } else {
           query.parentId = parentId.toString();
         }
+        console.log('MongoDB query:', JSON.stringify(query));
         const files = await dbClient.db.collection('files')
           .find(query)
           .sort({ _id: 1 })
           .skip(page * 20)
           .limit(20)
           .toArray();
+        console.log('Files found:', files.length);
         const result = files.map((file) => {
           let parentIdValue = file.parentId;
           if (parentIdValue === '0' || parentIdValue === 0 || parentIdValue === undefined) {
@@ -91,6 +101,7 @@ class FilesController {
         });
         return res.status(200).json(result);
       } catch (err) {
+        console.log('Error in getIndex:', err);
         return res.status(500).json({ error: 'Internal server error' });
       }
     }
