@@ -1,7 +1,7 @@
 import sha1 from 'sha1';
 import pkg from 'mongodb';
-import dbClient from '../utils/db';
-import redisClient from '../utils/redis';
+import dbClient from '../utils/db.mjs';
+import redisClient from '../utils/redis.mjs';
 
 const { ObjectId } = pkg;
 

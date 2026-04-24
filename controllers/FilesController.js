@@ -2,8 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
 import pkg from 'mongodb';
-import dbClient from '../utils/db';
-import redisClient from '../utils/redis';
+import dbClient from '../utils/db.mjs';
+import redisClient from '../utils/redis.mjs';
 
 const { ObjectId } = pkg;
 const getFolderPath = () => process.env.FOLDER_PATH || '/tmp/files_manager';
@@ -24,7 +24,7 @@ class FilesController {
       }
       if (!file) return res.status(404).json({ error: 'Not found' });
       let parentIdValue = file.parentId;
-      if (parentIdValue === '0') {
+      if (parentIdValue === '0' || parentIdValue === 0 || parentIdValue === undefined) {
         parentIdValue = 0;
       } else {
         parentIdValue = parentIdValue.toString();
