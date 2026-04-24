@@ -25,7 +25,6 @@ class FilesController {
     if (!type || !['folder', 'file', 'image'].includes(type)) return res.status(400).json({ error: 'Missing type' });
     if (type !== 'folder' && !data) return res.status(400).json({ error: 'Missing data' });
 
-
     let parentFile = null;
     let parentIdToStore = '0';
     let parentIdForResponse = 0;
