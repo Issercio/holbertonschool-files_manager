@@ -7,6 +7,9 @@ class AppController {
   }
 
   static async getStats(req, res) {
+    if (!dbClient.isAlive() || !dbClient.db) {
+      return res.status(503).json({ error: 'Database unavailable' });
+    }
     const users = await dbClient.nbUsers();
     const files = await dbClient.nbFiles();
     res.status(200).json({ users, files });

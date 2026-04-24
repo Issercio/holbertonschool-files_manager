@@ -5,6 +5,9 @@ import redisClient from '../utils/redis.mjs';
 
 class AuthController {
   static async getConnect(req, res) {
+    if (!dbClient.isAlive() || !dbClient.db) {
+      return res.status(503).json({ error: 'Database unavailable' });
+    }
     const authHeader = req.headers.authorization || '';
     if (!authHeader.startsWith('Basic ')) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -26,6 +29,9 @@ class AuthController {
   }
 
   static async getDisconnect(req, res) {
+    if (!dbClient.isAlive() || !dbClient.db) {
+      return res.status(503).json({ error: 'Database unavailable' });
+    }
     const token = req.headers['x-token'];
     if (!token) {
       return res.status(401).json({ error: 'Unauthorized' });

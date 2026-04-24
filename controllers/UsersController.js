@@ -7,6 +7,9 @@ const { ObjectId } = pkg;
 
 class UsersController {
   static async postNew(req, res) {
+    if (!dbClient.isAlive() || !dbClient.db) {
+      return res.status(503).json({ error: 'Database unavailable' });
+    }
     const { email, password } = req.body || {};
     if (!email) {
       return res.status(400).json({ error: 'Missing email' });
@@ -24,6 +27,9 @@ class UsersController {
   }
 
   static async getMe(req, res) {
+    if (!dbClient.isAlive() || !dbClient.db) {
+      return res.status(503).json({ error: 'Database unavailable' });
+    }
     const token = req.headers['x-token'];
     if (!token) {
       return res.status(401).json({ error: 'Unauthorized' });
