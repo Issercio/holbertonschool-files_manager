@@ -51,14 +51,7 @@ class FilesController {
       const page = parseInt(req.query.page, 10) || 0;
       let query = { userId: ObjectId(userId) };
       if (!parentId) {
-        query = {
-          userId: ObjectId(userId),
-          $or: [
-            { parentId: { $exists: false } },
-            { parentId: 0 },
-            { parentId: '0' },
-          ],
-        };
+        query.parentId = '0';
       } else {
         query.parentId = parentId.toString();
       }
