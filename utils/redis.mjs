@@ -1,7 +1,6 @@
 
 import redis from 'redis';
 
-
 class RedisClient {
   constructor() {
     this.client = redis.createClient();
@@ -15,7 +14,7 @@ class RedisClient {
   }
 
   get(key) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.client.get(key, (err, reply) => {
         if (err) {
           resolve(null);
@@ -23,11 +22,11 @@ class RedisClient {
           resolve(reply);
         }
       });
-    });
+    }); 
   }
 
   set(key, value, duration) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.client.set(key, value, 'EX', duration, (err, reply) => {
         if (err) {
           resolve(null);
@@ -39,7 +38,7 @@ class RedisClient {
   }
 
   del(key) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.client.del(key, (err, reply) => {
         if (err) {
           resolve(null);
