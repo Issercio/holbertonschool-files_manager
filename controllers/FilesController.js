@@ -170,6 +170,3 @@ class FilesController {
 }
 
 export default FilesController;
-}
-
-export default FilesController;
