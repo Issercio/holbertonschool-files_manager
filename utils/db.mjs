@@ -1,4 +1,5 @@
 import pkg from 'mongodb';
+
 const { MongoClient } = pkg;
 
 const host = process.env.DB_HOST || 'localhost';
