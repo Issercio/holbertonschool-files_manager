@@ -23,13 +23,19 @@ class FilesController {
         return res.status(404).json({ error: 'Not found' });
       }
       if (!file) return res.status(404).json({ error: 'Not found' });
+      let parentIdValue = file.parentId;
+      if (parentIdValue === undefined || parentIdValue === null || parentIdValue === 0 || parentIdValue === '0') {
+        parentIdValue = 0;
+      } else if (typeof parentIdValue === 'object' && parentIdValue.toString) {
+        parentIdValue = parentIdValue.toString();
+      }
       return res.status(200).json({
         id: file._id.toString(),
         userId: file.userId.toString(),
         name: file.name,
         type: file.type,
         isPublic: file.isPublic,
-        parentId: file.parentId === '0' ? 0 : file.parentId.toString(),
+        parentId: parentIdValue,
       });
     }
 
@@ -64,14 +70,22 @@ class FilesController {
           { $skip: page * 20 },
           { $limit: 20 },
         ]).toArray();
-      const result = files.map((file) => ({
-        id: file._id.toString(),
-        userId: file.userId.toString(),
-        name: file.name,
-        type: file.type,
-        isPublic: file.isPublic,
-        parentId: file.parentId === '0' ? 0 : file.parentId?.toString?.() ?? 0,
-      }));
+      const result = files.map((file) => {
+        let parentIdValue = file.parentId;
+        if (parentIdValue === undefined || parentIdValue === null || parentIdValue === 0 || parentIdValue === '0') {
+          parentIdValue = 0;
+        } else if (typeof parentIdValue === 'object' && parentIdValue.toString) {
+          parentIdValue = parentIdValue.toString();
+        }
+        return {
+          id: file._id.toString(),
+          userId: file.userId.toString(),
+          name: file.name,
+          type: file.type,
+          isPublic: file.isPublic,
+          parentId: parentIdValue,
+        };
+      });
       return res.status(200).json(result);
     }
   static async postUpload(req, res) {
