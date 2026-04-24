@@ -24,9 +24,9 @@ class FilesController {
       }
       if (!file) return res.status(404).json({ error: 'Not found' });
       let parentIdValue = file.parentId;
-      if (parentIdValue === undefined || parentIdValue === null || parentIdValue === 0 || parentIdValue === '0') {
+      if (parentIdValue === '0') {
         parentIdValue = 0;
-      } else if (typeof parentIdValue === 'object' && parentIdValue.toString) {
+      } else {
         parentIdValue = parentIdValue.toString();
       }
       return res.status(200).json({
@@ -60,7 +60,7 @@ class FilesController {
           ],
         };
       } else {
-        query.parentId = parentId === '0' ? '0' : ObjectId(parentId);
+        query.parentId = parentId.toString();
       }
       const files = await dbClient.db.collection('files')
         .find(query)
@@ -70,9 +70,9 @@ class FilesController {
         .toArray();
       const result = files.map((file) => {
         let parentIdValue = file.parentId;
-        if (parentIdValue === undefined || parentIdValue === null || parentIdValue === 0 || parentIdValue === '0') {
+        if (parentIdValue === '0') {
           parentIdValue = 0;
-        } else if (typeof parentIdValue === 'object' && parentIdValue.toString) {
+        } else {
           parentIdValue = parentIdValue.toString();
         }
         return {
@@ -114,8 +114,8 @@ class FilesController {
       }
       if (!parentFile) return res.status(400).json({ error: 'Parent not found' });
       if (parentFile.type !== 'folder') return res.status(400).json({ error: 'Parent is not a folder' });
-      parentIdToStore = ObjectId(parentId);
-      parentIdForResponse = parentId;
+      parentIdToStore = parentId.toString();
+      parentIdForResponse = parentId.toString();
     }
 
     const fileDoc = {
@@ -134,7 +134,7 @@ class FilesController {
         name,
         type,
         isPublic,
-        parentId: parentIdForResponse,
+        parentId: parentIdForResponse === '0' ? 0 : parentIdForResponse,
       });
     }
 
@@ -151,7 +151,7 @@ class FilesController {
       name,
       type,
       isPublic,
-      parentId: parentIdForResponse,
+      parentId: parentIdForResponse === '0' ? 0 : parentIdForResponse,
     });
   }
 }
