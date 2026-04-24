@@ -41,9 +41,22 @@ class FilesController {
       if (!token) return res.status(401).json({ error: 'Unauthorized' });
       const userId = await redisClient.get(`auth_${token}`);
       if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-      const parentId = req.query.parentId || '0';
+      const parentId = req.query.parentId;
       const page = parseInt(req.query.page, 10) || 0;
-      const match = { userId: ObjectId(userId), parentId: parentId === '0' ? '0' : ObjectId(parentId) };
+      let match = { userId: ObjectId(userId) };
+      if (!parentId) {
+        // root files: parentId is missing, 0 (number), or '0' (string)
+        match = {
+          userId: ObjectId(userId),
+          $or: [
+            { parentId: { $exists: false } },
+            { parentId: 0 },
+            { parentId: '0' },
+          ],
+        };
+      } else {
+        match.parentId = parentId === '0' ? '0' : ObjectId(parentId);
+      }
       const files = await dbClient.db.collection('files')
         .aggregate([
           { $match: match },
@@ -57,7 +70,7 @@ class FilesController {
         name: file.name,
         type: file.type,
         isPublic: file.isPublic,
-        parentId: file.parentId === '0' ? 0 : file.parentId.toString(),
+        parentId: file.parentId === '0' ? 0 : file.parentId?.toString?.() ?? 0,
       }));
       return res.status(200).json(result);
     }
