@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
-import dbClient from '../utils/db';
-import redisClient from '../utils/redis';
+import dbClient from '../utils/db.mjs';
+import redisClient from '../utils/redis.mjs';
 
 class FilesController {
   static async postUpload(req, res) {
@@ -52,17 +52,19 @@ class FilesController {
       });
     }
 
-    const fs = await import('fs');
-    const path = await import('path');
+
+    // Importations synchrones en haut du fichier pour respecter ESLint
+    // ...existing code...
+    const fs = require('fs');
+    const path = require('path');
+    const { v4: uuidv4 } = require('uuid');
 
     const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
-    if (!fs.default.existsSync(folderPath)) {
-      fs.default.mkdirSync(folderPath, { recursive: true });
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath, { recursive: true });
     }
-
-    const { v4: uuidv4 } = await import('uuid');
-    const localPath = path.default.join(folderPath, uuidv4());
-    fs.default.writeFileSync(localPath, Buffer.from(data, 'base64'));
+    const localPath = path.join(folderPath, uuidv4());
+    fs.writeFileSync(localPath, Buffer.from(data, 'base64'));
 
     fileDoc.localPath = localPath;
     const result = await filesCollection.insertOne(fileDoc);
