@@ -1,10 +1,12 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
-import dbClient from '../utils/db';
-import redisClient from '../utils/redis';
 import pkg from 'mongodb';
 const { ObjectId } = pkg;
+import dbClient from '../utils/db';
+import redisClient from '../utils/redis';
+
 
 const getFolderPath = () => process.env.FOLDER_PATH || '/tmp/files_manager';
 
@@ -20,7 +22,9 @@ class FilesController {
     const user = await dbClient.db.collection('users').findOne({ _id: ObjectId(userId) });
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-    const { name, type, parentId = 0, isPublic = false, data } = req.body || {};
+    const {
+      name, type, parentId = 0, isPublic = false, data,
+    } = req.body || {};
     if (!name) return res.status(400).json({ error: 'Missing name' });
     if (!type || !['folder', 'file', 'image'].includes(type)) return res.status(400).json({ error: 'Missing type' });
     if (type !== 'folder' && !data) return res.status(400).json({ error: 'Missing data' });
