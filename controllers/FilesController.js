@@ -125,7 +125,7 @@ class FilesController {
     const user = await usersCollection.findOne({ _id: ObjectId(userId) });
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-    const { parentId = 0, page = 0 } = req.query;
+    const { parentId, page = 0 } = req.query;
     const pageNum = parseInt(page, 10);
     const pageSize = 20;
     const skip = pageNum * pageSize;
@@ -133,7 +133,7 @@ class FilesController {
     const filesCollection = dbClient.db.collection('files');
 
     const matchQuery = { userId: ObjectId(userId) };
-    if (parentId === 0 || parentId === '0') {
+    if (!parentId || parentId === '0') {
       matchQuery.parentId = 0;
     } else {
       try {
