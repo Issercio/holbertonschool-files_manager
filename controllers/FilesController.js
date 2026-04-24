@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
-import dbClient from '../utils/db.mjs';
-import redisClient from '../utils/redis.mjs';
+import dbClient from '../utils/db';
+import redisClient from '../utils/redis';
 
 class FilesController {
   static async postUpload(req, res) {
@@ -52,19 +52,17 @@ class FilesController {
       });
     }
 
-
-    // Importations synchrones en haut du fichier pour respecter ESLint
-    // ...existing code...
-    const fs = require('fs');
-    const path = require('path');
-    const { v4: uuidv4 } = require('uuid');
+    const fs = await import('fs');
+    const path = await import('path');
 
     const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
-    if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath, { recursive: true });
+    if (!fs.default.existsSync(folderPath)) {
+      fs.default.mkdirSync(folderPath, { recursive: true });
     }
-    const localPath = path.join(folderPath, uuidv4());
-    fs.writeFileSync(localPath, Buffer.from(data, 'base64'));
+
+    const { v4: uuidv4 } = await import('uuid');
+    const localPath = path.default.join(folderPath, uuidv4());
+    fs.default.writeFileSync(localPath, Buffer.from(data, 'base64'));
 
     fileDoc.localPath = localPath;
     const result = await filesCollection.insertOne(fileDoc);
@@ -149,10 +147,14 @@ class FilesController {
           { parentId: { $exists: false } }
         ];
       } else {
-        try {
-          matchQuery.parentId = ObjectId(parentId);
-        } catch (e) {
-          return res.status(200).json([]);
+        if (!parentId || parentId === '0') {
+          matchQuery.parentId = 0;
+        } else {
+          try {
+            matchQuery.parentId = ObjectId(parentId);
+          } catch (e) {
+            return res.status(200).json([]);
+          }
         }
       }
     }
