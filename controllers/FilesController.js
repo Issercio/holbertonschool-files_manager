@@ -49,10 +49,9 @@ class FilesController {
       if (!userId) return res.status(401).json({ error: 'Unauthorized' });
       const parentId = req.query.parentId;
       const page = parseInt(req.query.page, 10) || 0;
-      let match = { userId: ObjectId(userId) };
+      let query = { userId: ObjectId(userId) };
       if (!parentId) {
-        // root files: parentId is missing, 0 (number), or '0' (string)
-        match = {
+        query = {
           userId: ObjectId(userId),
           $or: [
             { parentId: { $exists: false } },
@@ -61,15 +60,14 @@ class FilesController {
           ],
         };
       } else {
-        match.parentId = parentId === '0' ? '0' : ObjectId(parentId);
+        query.parentId = parentId === '0' ? '0' : ObjectId(parentId);
       }
       const files = await dbClient.db.collection('files')
-        .aggregate([
-          { $match: match },
-          { $sort: { _id: 1 } },
-          { $skip: page * 20 },
-          { $limit: 20 },
-        ]).toArray();
+        .find(query)
+        .sort({ _id: 1 })
+        .skip(page * 20)
+        .limit(20)
+        .toArray();
       const result = files.map((file) => {
         let parentIdValue = file.parentId;
         if (parentIdValue === undefined || parentIdValue === null || parentIdValue === 0 || parentIdValue === '0') {
