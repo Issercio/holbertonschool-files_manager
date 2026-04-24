@@ -25,11 +25,18 @@ class FilesController {
     if (!type || !['folder', 'file', 'image'].includes(type)) return res.status(400).json({ error: 'Missing type' });
     if (type !== 'folder' && !data) return res.status(400).json({ error: 'Missing data' });
 
+
     let parentFile = null;
+    let parentIdToStore = '0';
     if (parentId && parentId !== 0 && parentId !== '0') {
-      parentFile = await dbClient.db.collection('files').findOne({ _id: ObjectId(parentId) });
+      try {
+        parentFile = await dbClient.db.collection('files').findOne({ _id: ObjectId(parentId) });
+      } catch (e) {
+        return res.status(400).json({ error: 'Parent not found' });
+      }
       if (!parentFile) return res.status(400).json({ error: 'Parent not found' });
       if (parentFile.type !== 'folder') return res.status(400).json({ error: 'Parent is not a folder' });
+      parentIdToStore = parentId;
     }
 
     const fileDoc = {
@@ -37,7 +44,7 @@ class FilesController {
       name,
       type,
       isPublic,
-      parentId: parentId === 0 || parentId === '0' ? '0' : parentId,
+      parentId: parentIdToStore,
     };
 
     if (type === 'folder') {
@@ -48,7 +55,7 @@ class FilesController {
         name,
         type,
         isPublic,
-        parentId: fileDoc.parentId.toString(),
+        parentId: fileDoc.parentId,
       });
     }
 
@@ -65,7 +72,7 @@ class FilesController {
       name,
       type,
       isPublic,
-      parentId: fileDoc.parentId.toString(),
+      parentId: fileDoc.parentId,
     });
   }
 }
