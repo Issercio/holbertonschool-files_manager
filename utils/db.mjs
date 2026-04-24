@@ -19,7 +19,6 @@ class DBClient {
       })
       .catch(() => {
         this.connected = false;
-        // Optionally log error
       });
   }
 
