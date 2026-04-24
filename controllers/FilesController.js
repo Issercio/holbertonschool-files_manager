@@ -52,17 +52,21 @@ class FilesController {
       });
     }
 
-    const fs = await import('fs');
-    const path = await import('path');
+    // eslint-disable-next-line global-require
+    const fs = require('fs');
+    // eslint-disable-next-line global-require
+    const path = require('path');
 
     const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
     if (!fs.default.existsSync(folderPath)) {
       fs.default.mkdirSync(folderPath, { recursive: true });
     }
 
-    const { v4: uuidv4 } = await import('uuid');
-    const localPath = path.default.join(folderPath, uuidv4());
-    fs.default.writeFileSync(localPath, Buffer.from(data, 'base64'));
+
+    // eslint-disable-next-line global-require
+    const { v4: uuidv4 } = require('uuid');
+    const localPath = path.join(folderPath, uuidv4());
+    fs.writeFileSync(localPath, Buffer.from(data, 'base64'));
 
     fileDoc.localPath = localPath;
     const result = await filesCollection.insertOne(fileDoc);
