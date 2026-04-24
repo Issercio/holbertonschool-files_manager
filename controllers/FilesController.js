@@ -39,7 +39,14 @@ class FilesController {
 
     if (type === 'folder') {
       const result = await dbClient.db.collection('files').insertOne(fileDoc);
-      return res.status(201).json({ id: result.insertedId.toString(), userId, name, type, isPublic, parentId: fileDoc.parentId });
+      return res.status(201).json({
+        id: result.insertedId.toString(),
+        userId: userId.toString(),
+        name,
+        type,
+        isPublic,
+        parentId: fileDoc.parentId.toString(),
+      });
     }
 
     // For file or image
@@ -49,7 +56,14 @@ class FilesController {
     fs.writeFileSync(localPath, Buffer.from(data, 'base64'));
     fileDoc.localPath = localPath;
     const result = await dbClient.db.collection('files').insertOne(fileDoc);
-    return res.status(201).json({ id: result.insertedId.toString(), userId, name, type, isPublic, parentId: fileDoc.parentId });
+    return res.status(201).json({
+      id: result.insertedId.toString(),
+      userId: userId.toString(),
+      name,
+      type,
+      isPublic,
+      parentId: fileDoc.parentId.toString(),
+    });
   }
 }
 
