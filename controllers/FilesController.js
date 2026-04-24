@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
@@ -6,10 +5,8 @@ import pkg from 'mongodb';
 const { ObjectId } = pkg;
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
-
-
+ 
 const getFolderPath = () => process.env.FOLDER_PATH || '/tmp/files_manager';
-
 class FilesController {
   static async postUpload(req, res) {
     if (!dbClient.isAlive() || !dbClient.db) {
