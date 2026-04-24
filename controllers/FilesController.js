@@ -1,6 +1,9 @@
 import { ObjectId } from 'mongodb';
-import dbClient from '../utils/db.mjs';
-import redisClient from '../utils/redis.mjs';
+import dbClient from '../utils/db';
+import redisClient from '../utils/redis';
+import fs from 'fs';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 class FilesController {
   static async postUpload(req, res) {
@@ -31,7 +34,6 @@ class FilesController {
       if (!parentFile) return res.status(400).json({ error: 'Parent not found' });
       if (parentFile.type !== 'folder') return res.status(400).json({ error: 'Parent is not a folder' });
     }
-
     const fileDoc = {
       userId: ObjectId(userId),
       name,
@@ -52,12 +54,6 @@ class FilesController {
       });
     }
 
-
-    // Importations synchrones en haut du fichier pour respecter ESLint
-    // ...existing code...
-    const fs = require('fs');
-    const path = require('path');
-    const { v4: uuidv4 } = require('uuid');
 
     const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
     if (!fs.existsSync(folderPath)) {
@@ -139,21 +135,19 @@ class FilesController {
       matchQuery.$or = [
         { parentId: 0 },
         { parentId: '0' },
-        { parentId: { $exists: false } }
+        { parentId: { $exists: false } },
+      ];
+    } else if (parentId === '0' || parentId === 0) {
+      matchQuery.$or = [
+        { parentId: 0 },
+        { parentId: '0' },
+        { parentId: { $exists: false } },
       ];
     } else {
-      if (parentId === '0' || parentId === 0) {
-        matchQuery.$or = [
-          { parentId: 0 },
-          { parentId: '0' },
-          { parentId: { $exists: false } }
-        ];
-      } else {
-        try {
-          matchQuery.parentId = ObjectId(parentId);
-        } catch (e) {
-          return res.status(200).json([]);
-        }
+      try {
+        matchQuery.parentId = ObjectId(parentId);
+      } catch (e) {
+        return res.status(200).json([]);
       }
     }
 
@@ -171,9 +165,11 @@ class FilesController {
       isPublic: file.isPublic,
       parentId: file.parentId,
     }));
-
     return res.status(200).json(result);
   }
+}
+
+export default FilesController;
 }
 
 export default FilesController;
