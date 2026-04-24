@@ -3,6 +3,7 @@ import pkg from 'mongodb';
 const { ObjectId } = pkg;
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
+
 class UsersController {
   static async postNew(req, res) {
     const { email, password } = req.body || {};
