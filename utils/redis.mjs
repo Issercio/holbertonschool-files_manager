@@ -22,7 +22,7 @@ class RedisClient {
           resolve(reply);
         }
       });
-    }); 
+    });
   }
 
   set(key, value, duration) {
