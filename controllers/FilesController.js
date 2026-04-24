@@ -133,13 +133,25 @@ class FilesController {
     const filesCollection = dbClient.db.collection('files');
 
     const matchQuery = { userId: ObjectId(userId) };
-    if (!parentId || parentId === '0') {
-      matchQuery.parentId = 0;
+    if (!parentId) {
+      matchQuery.$or = [
+        { parentId: 0 },
+        { parentId: '0' },
+        { parentId: { $exists: false } }
+      ];
     } else {
-      try {
-        matchQuery.parentId = ObjectId(parentId);
-      } catch (e) {
-        return res.status(200).json([]);
+      if (parentId === '0' || parentId === 0) {
+        matchQuery.$or = [
+          { parentId: 0 },
+          { parentId: '0' },
+          { parentId: { $exists: false } }
+        ];
+      } else {
+        try {
+          matchQuery.parentId = ObjectId(parentId);
+        } catch (e) {
+          return res.status(200).json([]);
+        }
       }
     }
 
