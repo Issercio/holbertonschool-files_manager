@@ -28,6 +28,7 @@ class FilesController {
 
     let parentFile = null;
     let parentIdToStore = '0';
+    let parentIdForResponse = 0;
     if (parentId && parentId !== 0 && parentId !== '0') {
       try {
         parentFile = await dbClient.db.collection('files').findOne({ _id: ObjectId(parentId) });
@@ -36,7 +37,8 @@ class FilesController {
       }
       if (!parentFile) return res.status(400).json({ error: 'Parent not found' });
       if (parentFile.type !== 'folder') return res.status(400).json({ error: 'Parent is not a folder' });
-      parentIdToStore = parentId;
+      parentIdToStore = ObjectId(parentId);
+      parentIdForResponse = parentId;
     }
 
     const fileDoc = {
@@ -55,7 +57,7 @@ class FilesController {
         name,
         type,
         isPublic,
-        parentId: fileDoc.parentId,
+        parentId: parentIdForResponse,
       });
     }
 
@@ -72,7 +74,7 @@ class FilesController {
       name,
       type,
       isPublic,
-      parentId: fileDoc.parentId,
+      parentId: parentIdForResponse,
     });
   }
 }
