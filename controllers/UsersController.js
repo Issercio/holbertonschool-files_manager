@@ -1,8 +1,9 @@
 import sha1 from 'sha1';
 import pkg from 'mongodb';
-const { ObjectId } = pkg;
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
+
+const { ObjectId } = pkg;
 
 class UsersController {
   static async postNew(req, res) {
