@@ -40,50 +40,55 @@ class FilesController {
     }
 
     static async getIndex(req, res) {
-      if (!dbClient.isAlive() || !dbClient.db) {
-        return res.status(503).json({ error: 'Database unavailable' });
-      }
-      const token = req.headers['x-token'];
-      if (!token) return res.status(401).json({ error: 'Unauthorized' });
-      const userId = await redisClient.get(`auth_${token}`);
-      if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-      const parentId = req.query.parentId;
-      const page = parseInt(req.query.page, 10) || 0;
-      let query = { userId: ObjectId(userId) };
-      if (!parentId) {
-        query = {
-          userId: ObjectId(userId),
-          $or: [
-            { parentId: '0' },
-            { parentId: { $exists: false } }
-          ]
-        };
-      } else {
-        query.parentId = parentId.toString();
-      }
-      const files = await dbClient.db.collection('files')
-        .find(query)
-        .sort({ _id: 1 })
-        .skip(page * 20)
-        .limit(20)
-        .toArray();
-      const result = files.map((file) => {
-        let parentIdValue = file.parentId;
-        if (parentIdValue === '0') {
-          parentIdValue = 0;
-        } else {
-          parentIdValue = parentIdValue.toString();
+      try {
+        if (!dbClient.isAlive() || !dbClient.db) {
+          return res.status(503).json({ error: 'Database unavailable' });
         }
-        return {
-          id: file._id.toString(),
-          userId: file.userId.toString(),
-          name: file.name,
-          type: file.type,
-          isPublic: file.isPublic,
-          parentId: parentIdValue,
-        };
-      });
-      return res.status(200).json(result);
+        const token = req.headers['x-token'];
+        if (!token) return res.status(401).json({ error: 'Unauthorized' });
+        const userId = await redisClient.get(`auth_${token}`);
+        if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+        const parentId = req.query.parentId;
+        const page = parseInt(req.query.page, 10) || 0;
+        let query = { userId: ObjectId(userId) };
+        if (!parentId) {
+          query = {
+            userId: ObjectId(userId),
+            $or: [
+              { parentId: '0' },
+              { parentId: 0 },
+              { parentId: { $exists: false } }
+            ]
+          };
+        } else {
+          query.parentId = parentId.toString();
+        }
+        const files = await dbClient.db.collection('files')
+          .find(query)
+          .sort({ _id: 1 })
+          .skip(page * 20)
+          .limit(20)
+          .toArray();
+        const result = files.map((file) => {
+          let parentIdValue = file.parentId;
+          if (parentIdValue === '0' || parentIdValue === 0 || parentIdValue === undefined) {
+            parentIdValue = 0;
+          } else {
+            parentIdValue = parentIdValue.toString();
+          }
+          return {
+            id: file._id.toString(),
+            userId: file.userId.toString(),
+            name: file.name,
+            type: file.type,
+            isPublic: file.isPublic,
+            parentId: parentIdValue,
+          };
+        });
+        return res.status(200).json(result);
+      } catch (err) {
+        return res.status(500).json({ error: 'Internal server error' });
+      }
     }
   static async postUpload(req, res) {
     if (!dbClient.isAlive() || !dbClient.db) {
