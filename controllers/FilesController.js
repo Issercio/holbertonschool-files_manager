@@ -58,10 +58,10 @@ class FilesController {
     const path = require('path');
 
     const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
-    if (!fs.default.existsSync(folderPath)) {
-      fs.default.mkdirSync(folderPath, { recursive: true });
-    }
 
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath, { recursive: true });
+    }
 
     // eslint-disable-next-line global-require
     const { v4: uuidv4 } = require('uuid');
@@ -136,20 +136,12 @@ class FilesController {
     const filesCollection = dbClient.db.collection('files');
 
     const matchQuery = { userId: ObjectId(userId) };
-    if (!parentId) {
+    if (!parentId || parentId === '0' || parentId === 0) {
       matchQuery.$or = [
         { parentId: 0 },
         { parentId: '0' },
         { parentId: { $exists: false } },
       ];
-    } else if (parentId === '0' || parentId === 0) {
-      matchQuery.$or = [
-        { parentId: 0 },
-        { parentId: '0' },
-        { parentId: { $exists: false } },
-      ];
-    } else if (!parentId || parentId === '0') {
-      matchQuery.parentId = 0;
     } else {
       try {
         matchQuery.parentId = ObjectId(parentId);
@@ -176,4 +168,5 @@ class FilesController {
     return res.status(200).json(result);
   }
 }
+
 export default FilesController;
