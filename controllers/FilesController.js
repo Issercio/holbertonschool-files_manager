@@ -170,6 +170,82 @@ class FilesController {
 
     return res.status(200).json(result);
   }
+
+  static async putPublish(req, res) {
+    const token = req.headers['x-token'];
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+    const userId = await redisClient.get(`auth_${token}`);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const usersCollection = dbClient.db.collection('users');
+    const user = await usersCollection.findOne({ _id: ObjectId(userId) });
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { id } = req.params;
+    let fileId;
+    try {
+      fileId = ObjectId(id);
+    } catch (e) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    const filesCollection = dbClient.db.collection('files');
+    const file = await filesCollection.findOneAndUpdate(
+      { _id: fileId, userId: ObjectId(userId) },
+      { $set: { isPublic: true } },
+      { returnDocument: 'after' },
+    );
+
+    if (!file.value) return res.status(404).json({ error: 'Not found' });
+
+    return res.status(200).json({
+      id: file.value._id,
+      userId: file.value.userId,
+      name: file.value.name,
+      type: file.value.type,
+      isPublic: file.value.isPublic,
+      parentId: file.value.parentId,
+    });
+  }
+
+  static async putUnpublish(req, res) {
+    const token = req.headers['x-token'];
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+    const userId = await redisClient.get(`auth_${token}`);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const usersCollection = dbClient.db.collection('users');
+    const user = await usersCollection.findOne({ _id: ObjectId(userId) });
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { id } = req.params;
+    let fileId;
+    try {
+      fileId = ObjectId(id);
+    } catch (e) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    const filesCollection = dbClient.db.collection('files');
+    const file = await filesCollection.findOneAndUpdate(
+      { _id: fileId, userId: ObjectId(userId) },
+      { $set: { isPublic: false } },
+      { returnDocument: 'after' },
+    );
+
+    if (!file.value) return res.status(404).json({ error: 'Not found' });
+
+    return res.status(200).json({
+      id: file.value._id,
+      userId: file.value.userId,
+      name: file.value.name,
+      type: file.value.type,
+      isPublic: file.value.isPublic,
+      parentId: file.value.parentId,
+    });
+  }
 }
 
 export default FilesController;
