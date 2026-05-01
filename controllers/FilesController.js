@@ -70,7 +70,6 @@ class FilesController {
 
     fileDoc.localPath = localPath;
     const result = await filesCollection.insertOne(fileDoc);
-
     return res.status(201).json({
       id: result.insertedId,
       userId,
@@ -141,25 +140,21 @@ class FilesController {
       matchQuery.$or = [
         { parentId: 0 },
         { parentId: '0' },
-        { parentId: { $exists: false } }
+        { parentId: { $exists: false } },
       ];
+    } else if (parentId === '0' || parentId === 0) {
+      matchQuery.$or = [
+        { parentId: 0 },
+        { parentId: '0' },
+        { parentId: { $exists: false } },
+      ];
+    } else if (!parentId || parentId === '0') {
+      matchQuery.parentId = 0;
     } else {
-      if (parentId === '0' || parentId === 0) {
-        matchQuery.$or = [
-          { parentId: 0 },
-          { parentId: '0' },
-          { parentId: { $exists: false } }
-        ];
-      } else {
-        if (!parentId || parentId === '0') {
-          matchQuery.parentId = 0;
-        } else {
-          try {
-            matchQuery.parentId = ObjectId(parentId);
-          } catch (e) {
-            return res.status(200).json([]);
-          }
-        }
+      try {
+        matchQuery.parentId = ObjectId(parentId);
+      } catch (e) {
+        return res.status(200).json([]);
       }
     }
 
@@ -181,5 +176,4 @@ class FilesController {
     return res.status(200).json(result);
   }
 }
-
 export default FilesController;
