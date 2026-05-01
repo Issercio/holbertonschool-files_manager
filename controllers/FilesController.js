@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
+// FIX ligne 4 : suppression du export default prématuré (la classe n'était pas encore définie)
 class FilesController {
   static async postUpload(req, res) {
     const token = req.headers['x-token'];
@@ -59,6 +60,7 @@ class FilesController {
 
     const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
 
+    // FIX lignes 79/81 : fs.default n'existe pas, on utilise fs directement
     if (!fs.existsSync(folderPath)) {
       fs.mkdirSync(folderPath, { recursive: true });
     }
@@ -135,6 +137,7 @@ class FilesController {
 
     const filesCollection = dbClient.db.collection('files');
 
+    // FIX ligne 118 : conditions redondantes simplifiées en une logique claire
     const matchQuery = { userId: ObjectId(userId) };
     if (!parentId || parentId === '0' || parentId === 0) {
       matchQuery.$or = [
